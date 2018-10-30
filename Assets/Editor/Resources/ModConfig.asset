@@ -13,15 +13,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: DividedSquares
   title: Divided Squares
-  description: '<description>
-
-
-    Module created by Timwi.
-
-
-    [url=http://ktane.timwi.de/PDF/Divided%20Squares.pdf]Manual PDF[/url]
-
-    [url=http://ktane.timwi.de/HTML/Divided%20Squares.html]Manual HTML[/url]'
+  description: "Amytaslydertorisaitdicswat, n. /\u02C8\xE6m\u026A\u02CCt\xE6sl\u026A\u02C8d\u025C\u02D0\u02CCt\u0252ri\u02C8se\u026A\u032Ftd\u026Ak\u0361s\u02CCw\u0251t/\r\nA
+    module you think about so little, you didn\u2019t even realize the only reason
+    it says Amytaslydertorisaitmicswat in the description is Colored Squares was already
+    taken. \n\nModule created by Timwi.\n\n[url=http://ktane.timwi.de/PDF/Divided%20Squares.pdf]Manual
+    PDF[/url]\n[url=http://ktane.timwi.de/HTML/Divided%20Squares.html]Manual HTML[/url]"
   version: 1.0
   outputFolder: build
   previewImage: {fileID: 2800000, guid: bd5c1f4881f57d54481b44e4c8a7779a, type: 3}
