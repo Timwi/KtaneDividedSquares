@@ -50,6 +50,7 @@ public class DividedSquaresModule : MonoBehaviour
     private int _numOtherModules;
     private int _curSolved;
     private bool _arrangeRunning;
+    private int _animationRunning;
     private int? _squareDownAtSolved;
     private int? _squareDownAtTimer;
     private bool _isSolved;
@@ -66,6 +67,8 @@ public class DividedSquaresModule : MonoBehaviour
         _squares = AllSquares.Select(obj => obj.GetComponent<MeshRenderer>()).ToArray();
         _squareDownAtSolved = null;
         _isSolved = false;
+        _arrangeRunning = false;
+        _animationRunning = 0;
 
         var snPairs = new List<ColorPair>();
         foreach (var ch in Bomb.GetSerialNumberLetters().Distinct())
@@ -84,7 +87,7 @@ public class DividedSquaresModule : MonoBehaviour
 
         if (Application.isEditor)
         {
-            _numOtherModules = 8;
+            _numOtherModules = 0;
             StartCoroutine(Arrange(2, _curSolved));
         }
         else
@@ -99,7 +102,7 @@ public class DividedSquaresModule : MonoBehaviour
     {
         return delegate
         {
-            if (_isSolved)
+            if (_isSolved || _animationRunning > 0)
                 return false;
             if (x + _sideLength * y != _correctSquare)
             {
@@ -155,6 +158,7 @@ public class DividedSquaresModule : MonoBehaviour
 
     private IEnumerator solveOrStrikeAnimation(int x, int y, int i, bool solve)
     {
+        _animationRunning++;
         Rotator.gameObject.SetActive(true);
         var sz = 0.1625f / _sideLength;
         Rotator.localPosition = new Vector3(sz * (x - _sideLength * .5f) - .0005f, 0, -sz * (y - (_sideLength - 1) * .5f));
@@ -199,10 +203,12 @@ public class DividedSquaresModule : MonoBehaviour
             StatusLight.gameObject.SetActive(false);
         }
         _squares[i].transform.parent = Field;
+        _animationRunning--;
     }
 
     private IEnumerator bounceLight(int i, float sz, bool solve)
     {
+        _animationRunning++;
         StatusLight.gameObject.SetActive(true);
         var duration = .21f;
         var elapsed = 0f;
@@ -241,6 +247,7 @@ public class DividedSquaresModule : MonoBehaviour
             yield return null;
         }
         StatusLight.localPosition = new Vector3(x, solve ? 0 : -sz * 1.1f, z);
+        _animationRunning--;
     }
 
     private bool allSolved()
@@ -348,7 +355,6 @@ public class DividedSquaresModule : MonoBehaviour
             else
             {
                 // Pick a valid target number of solved modules and determine the correct colors for it
-                Debug.LogFormat(@"<Divided Squares #{0}> Targets to choose from: {1}", _moduleId, string.Join(", ", targetNumbers.Select(num => num.ToString()).ToArray()));
                 _correctNumSolved = targetNumbers.PickRandom();
                 var ix = Array.IndexOf(_table, _correctNumSolved.Value - sideLength * sideLength + 1);
                 _colorA = ix % Colors.Length;
@@ -396,6 +402,8 @@ public class DividedSquaresModule : MonoBehaviour
             var adj2 = adjacents[Rnd.Range(0, adjacents.Count)];
             adjacents.Remove(adj2);
 
+            Debug.LogFormat(@"<Divided Squares #{0}> Adj: {1}{2}, {3}{4}", _moduleId, (char) ('A' + adj1 % sideLength), adj1 / sideLength + 1, (char) ('A' + adj2 % sideLength), adj2 / sideLength + 1);
+
             // Use a recursive brute-force solver to find an arrangement of colors that satisfies all of the conditions.
             _numFails = 0;
             if (!fill(colors, 0, sideLength, adj1, adj2))
@@ -404,6 +412,9 @@ public class DividedSquaresModule : MonoBehaviour
                 yield return null;
                 goto tryAgain;
             }
+
+            for (int y = 0; y < sideLength; y++)
+                Debug.LogFormat(@"<Divided Squares #{0}> numPairs {1} = {2}", _moduleId, y, string.Join(", ", Enumerable.Range(0, sideLength).Select(x => numPairs(colors, y * sideLength + x, y * sideLength + x, colors[y * sideLength + x].Value, sideLength).ToString()).ToArray()));
 
             var numbers = Enumerable.Range(0, sideLength * sideLength).ToList();
             var step = Rnd.Range(sideLength * sideLength / 4, 3 * sideLength * sideLength / 4);
@@ -439,10 +450,11 @@ public class DividedSquaresModule : MonoBehaviour
         for (int i = 0; i < Colors.Length; i++)
         {
             var cs = (s + i) % Colors.Length;
-            if (/* Above */ !(ix < w || (cs != colors[ix - w] && (ix - w == _correctSquare || numPairs(colors, ix - w, ix, cs, w) < 2))) ||
-                /* Left */ !(ix % w == 0 || (cs != colors[ix - 1] && (ix - 1 == _correctSquare || numPairs(colors, ix - 1, ix, cs, w) < 2))) ||
-                /* Below */ !(ix + w >= w * w || ((ix + w != adj1 || cs != colors[adj1]) && (ix + w != adj2 || cs != colors[adj2]) && (ix + w != _correctSquare || cs != colors[_correctSquare]))) ||
-                /* Right */ !(ix % w == w - 1 || ((ix + 1 != adj1 || cs != colors[adj1]) && (ix + 1 != adj2 || cs != colors[adj2]) && (ix + 1 != _correctSquare || cs != colors[_correctSquare]))))
+            var aboveFine = ix < w || (cs != colors[ix - w] && (ix - w == _correctSquare || numPairs(colors, ix - w, ix, cs, w) < 2));
+            var leftFine = ix % w == 0 || (cs != colors[ix - 1] && (ix - 1 == _correctSquare || numPairs(colors, ix - 1, ix, cs, w) < 2));
+            var belowFine = ix + w >= w * w || (colors[ix + w] != cs && (colors[ix + w] == null || ix + w == _correctSquare || numPairs(colors, ix + w, ix, cs, w) < 2));
+            var rightFine = ix % w == w - 1 || (colors[ix + 1] != cs && (colors[ix + 1] == null || ix + 1 == _correctSquare || numPairs(colors, ix + 1, ix, cs, w) < 2));
+            if (!aboveFine || !leftFine || !belowFine || !rightFine)
                 continue;
             colors[ix] = cs;
             if (fill(colors, ix + 1, w, adj1, adj2))
