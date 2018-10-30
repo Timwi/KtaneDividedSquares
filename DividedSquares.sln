@@ -1,9 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28010.2026
-MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DividedSquares", "DividedSquares.csproj", "{E6C622FF-15E3-77BD-C86C-08194A256C66}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DividedSquares", "DividedSquares.csproj", "{F3432CD0-4A7C-5F3D-8F23-4CBD70A2AC2E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DividedSquares.Editor", "DividedSquares.Editor.csproj", "{3907DC61-3C7A-1FC4-73C8-02A5DE05CCE9}"
 EndProject
@@ -13,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E6C622FF-15E3-77BD-C86C-08194A256C66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6C622FF-15E3-77BD-C86C-08194A256C66}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6C622FF-15E3-77BD-C86C-08194A256C66}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6C622FF-15E3-77BD-C86C-08194A256C66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3432CD0-4A7C-5F3D-8F23-4CBD70A2AC2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3432CD0-4A7C-5F3D-8F23-4CBD70A2AC2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3432CD0-4A7C-5F3D-8F23-4CBD70A2AC2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3432CD0-4A7C-5F3D-8F23-4CBD70A2AC2E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3907DC61-3C7A-1FC4-73C8-02A5DE05CCE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3907DC61-3C7A-1FC4-73C8-02A5DE05CCE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3907DC61-3C7A-1FC4-73C8-02A5DE05CCE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -24,8 +22,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {F0941FAB-51EE-408B-B760-F864A7BB65EF}
 	EndGlobalSection
 EndGlobal
