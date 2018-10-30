@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DividedSquares;
 using KModkit;
 using UnityEngine;
@@ -480,5 +481,47 @@ public class DividedSquaresModule : MonoBehaviour
         if (ix + sideLength < sideLength * sideLength && _snColorPairs.Any(pair => pair.A == colors[ix] && pair.B == colors[ix + sideLength]))
             r++;
         return r;
+    }
+
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"!examine a1 [Briefly examine square A1] | !press a1 [Press square A1 across a timer tick]";
+#pragma warning restore 414
+
+    IEnumerator ProcessTwitchCommand(string command)
+    {
+        var m = Regex.Match(command, @"\A\s*(?:(?<examine>examine)|(?<press>press))\s+(?<sq>[A-Z]\d+)\s*\z", RegexOptions.IgnoreCase);
+        if (!m.Success)
+            yield break;
+
+        var square = m.Groups["sq"].Value;
+        var x = char.ToUpperInvariant(square[0]) - 'A';
+        int y;
+        if (!int.TryParse(square.Substring(1), out y))
+            yield break;
+        y--;
+        yield return null;
+
+        if (m.Groups["examine"].Success)
+        {
+            tryAgain:
+            var time = (int) Bomb.GetTime();
+            var solved = Bomb.GetSolvedModuleNames().Count();
+            yield return new WaitUntil(() => (int) Bomb.GetTime() != time);
+            if (Bomb.GetSolvedModuleNames().Count() != solved)
+                goto tryAgain;
+            yield return AllSquares[x + 13 * y];
+            yield return new WaitForSeconds(.4f);
+            yield return AllSquares[x + 13 * y];
+        }
+        else if (m.Groups["press"].Success)
+        {
+            yield return AllSquares[x + 13 * y];
+            var time = (int) Bomb.GetTime();
+            var solved = Bomb.GetSolvedModuleNames().Count();
+            yield return new WaitUntil(() => (int) Bomb.GetTime() != time);
+            yield return AllSquares[x + 13 * y];
+            if (Bomb.GetSolvedModuleNames().Count() != solved)
+                yield return "sendtochat The number of solved modules has changed, so... try again?";
+        }
     }
 }
