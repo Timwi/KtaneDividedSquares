@@ -161,25 +161,21 @@ public class DividedSquaresModule : MonoBehaviour
         _squares[i].transform.parent = Rotator;
 
         StatusLight.localPosition = new Vector3(sz * (x - (_sideLength - 1) * .5f), -sz * 1.1f, -sz * (y - (_sideLength - 1) * .5f));
-        StatusLight.localScale = new Vector3(sz, sz, sz) * 30;
         Capsule.sharedMaterial.color = Color.grey;
         StatusLight.gameObject.SetActive(true);
+
+        Audio.PlaySoundAtTransform("DoorOpen", _squares[i].transform);
+        StartCoroutine(bounceLight(i, sz, solve));
 
         var duration = .6f;
         var elapsed = 0f;
         var maxAngle = 111f;
-        var lightStarted = false;
         var halfWay = false;
         while (elapsed < duration)
         {
             var t = elapsed / duration;
             Rotator.localEulerAngles = new Vector3(0, 0, t * (1 - t) * 4 * maxAngle);
             elapsed += Time.deltaTime;
-            if (!lightStarted && elapsed > duration * .35f)
-            {
-                lightStarted = true;
-                StartCoroutine(bounceLight(i, sz, solve));
-            }
             if (!halfWay && elapsed > duration * .5f)
             {
                 halfWay = true;
@@ -189,9 +185,17 @@ public class DividedSquaresModule : MonoBehaviour
             yield return null;
         }
         Rotator.localEulerAngles = new Vector3(0, 0, 0);
+        Audio.PlaySoundAtTransform("DoorClose", _squares[i].transform);
         if (!solve)
         {
-            yield return new WaitForSeconds(.8f);
+            duration = .8f;
+            elapsed = 0f;
+            while (elapsed < duration)
+            {
+                StatusLight.localScale = new Vector3(sz, sz, sz) * (30 - 20 * elapsed / duration);
+                yield return null;
+                elapsed += Time.deltaTime;
+            }
             StatusLight.gameObject.SetActive(false);
         }
         _squares[i].transform.parent = Field;
@@ -199,10 +203,21 @@ public class DividedSquaresModule : MonoBehaviour
 
     private IEnumerator bounceLight(int i, float sz, bool solve)
     {
+        StatusLight.gameObject.SetActive(true);
+        var duration = .21f;
+        var elapsed = 0f;
+        while (elapsed < duration)
+        {
+            StatusLight.localScale = new Vector3(sz, sz, sz) * (10 + 20 * elapsed / duration);
+            yield return null;
+            elapsed += Time.deltaTime;
+        }
+
+        Audio.PlaySoundAtTransform("Boing", StatusLight);
         var x = StatusLight.localPosition.x;
         var z = StatusLight.localPosition.z;
-        var duration = .8f;
-        var elapsed = 0f;
+        duration = .8f;
+        elapsed = 0f;
         var maxHeight = 2 * sz;
         var processed = false;
         while (elapsed < duration)
