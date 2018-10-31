@@ -499,6 +499,13 @@ public class DividedSquaresModule : MonoBehaviour
         if (!int.TryParse(square.Substring(1), out y))
             yield break;
         y--;
+
+        if (x >= _sideLength || y < 0 || y >= _sideLength)
+        {
+            yield return "sendtochat @{0} Dude, it’s not THAT big yet.";
+            yield break;
+        }
+
         yield return null;
 
         if (m.Groups["examine"].Success)
@@ -521,7 +528,11 @@ public class DividedSquaresModule : MonoBehaviour
             yield return new WaitUntil(() => (int) Bomb.GetTime() != time);
             yield return AllSquares[x + 13 * y];
             if (Bomb.GetSolvedModuleNames().Count() != solved)
-                yield return "sendtochat The number of solved modules has changed, so... try again?";
+                yield return "sendtochat @{0} Shucks mate — some module got solved at the same time, so... try again?";
         }
+
+        // To ensure the strikes and solves are correctly attributed, just keep the coroutine active while the animation is still running
+        while (_animationRunning > 0)
+            yield return null;
     }
 }
