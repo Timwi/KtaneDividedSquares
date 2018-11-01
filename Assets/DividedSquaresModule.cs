@@ -508,7 +508,10 @@ public class DividedSquaresModule : MonoBehaviour
 
         yield return null;
 
-        if (m.Groups["examine"].Success)
+        // If it’s the wrong square, just press it; it’ll strike regardless of whether we’re doing “examine” or “press”
+        if (_correctSquare != x + 13 * y)
+            yield return new[] { AllSquares[x + 13 * y] };
+        else if (m.Groups["examine"].Success)
         {
             tryAgain:
             var time = (int) Bomb.GetTime();
