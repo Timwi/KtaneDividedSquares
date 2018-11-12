@@ -24,12 +24,16 @@ public class DividedSquaresModule : MonoBehaviour
     public Transform StatusLight;
     public Transform CapsuleContainer;
     public MeshRenderer Capsule;
+    public KMColorblindMode ColorblindMode;
+    public TextMesh TextTempl;
+    public TextMesh[] ColorblindTexts;
 
     private static int _moduleIdCounter = 1;
     private int _moduleId;
 
     public Color[] Colors;
     public string[] ColorNames;
+    public string[] ColorblindColorNames;
 
     public int TestingSize;
     public int TestingNumModules;
@@ -63,6 +67,7 @@ public class DividedSquaresModule : MonoBehaviour
     {
         CapsuleContainer.gameObject.SetActive(Application.isEditor);
         StatusLight.gameObject.SetActive(false);
+        SetColorblind(ColorblindMode.ColorblindModeActive);
 
         _moduleId = _moduleIdCounter++;
         _squares = AllSquares.Select(obj => obj.GetComponent<MeshRenderer>()).ToArray();
@@ -88,8 +93,8 @@ public class DividedSquaresModule : MonoBehaviour
 
         if (Application.isEditor)
         {
-            _numOtherModules = 0;
-            StartCoroutine(Arrange(2, _curSolved));
+            _numOtherModules = 38;
+            StartCoroutine(Arrange(3, _curSolved));
         }
         else
         {
@@ -97,6 +102,12 @@ public class DividedSquaresModule : MonoBehaviour
             Debug.LogFormat(@"<Divided Squares #{0}> _numOtherModules = {1}", _moduleId, _numOtherModules);
             StartCoroutine(Arrange(1, _curSolved));
         }
+    }
+
+    private void SetColorblind(bool setting)
+    {
+        for (var i = 0; i < ColorblindTexts.Length; i++)
+            ColorblindTexts[i].gameObject.SetActive(setting);
     }
 
     private KMSelectable.OnInteractHandler mouseDown(int x, int y, int i)
@@ -112,7 +123,8 @@ public class DividedSquaresModule : MonoBehaviour
             }
             else
             {
-                _squares[i].material.color = Colors[_colorB];
+                Audio.PlaySoundAtTransform("MouseDown", _squares[i].transform);
+                setSquareColor(i, _colorB);
                 _squareDownAtSolved = Bomb.GetSolvedModuleNames().Count();
                 _squareDownAtTimer = (int) Bomb.GetTime();
             }
@@ -124,9 +136,10 @@ public class DividedSquaresModule : MonoBehaviour
     {
         return delegate
         {
-            _squares[(_correctSquare % _sideLength) + 13 * (_correctSquare / _sideLength)].material.color = Colors[_colorA];
+            setSquareColor((_correctSquare % _sideLength) + 13 * (_correctSquare / _sideLength), _colorA);
             if (_squareDownAtSolved == null)
                 return;
+            Audio.PlaySoundAtTransform("MouseUp", _squares[i].transform);
 
             var c = Bomb.GetSolvedModuleNames().Count();
             if (c != _squareDownAtSolved.Value)
@@ -319,8 +332,7 @@ public class DividedSquaresModule : MonoBehaviour
             var ix = Array.IndexOf(_table, _correctNumSolved.Value);
             _colorA = ix % Colors.Length;
             _colorB = ix / Colors.Length;
-            _squares[0].material.color = Colors[_colorA];
-            _squares[0].gameObject.SetActive(true);
+            setSquareColor(0, _colorA);
         }
         else
         {
@@ -425,9 +437,7 @@ public class DividedSquaresModule : MonoBehaviour
                 nIx %= numbers.Count;
                 var n = numbers[nIx];
                 numbers.RemoveAt(nIx);
-                var obj = _squares[(n % sideLength) + 13 * (n / sideLength)];
-                obj.material.color = Colors[colors[n].Value];
-                obj.gameObject.SetActive(true);
+                setSquareColor((n % sideLength) + 13 * (n / sideLength), colors[n].Value);
                 nIx += step;
                 yield return new WaitForSeconds(.1f / sideLength);
             }
@@ -438,6 +448,13 @@ public class DividedSquaresModule : MonoBehaviour
         Debug.LogFormat(@"[Divided Squares #{0}] Color A is {1}, Color B is {2}.", _moduleId, ColorNames[_colorA], ColorNames[_colorB]);
         Debug.LogFormat(@"[Divided Squares #{0}] Target number of solved modules: {1}.", _moduleId, _correctNumSolved == null ? "any" : _correctNumSolved.Value.ToString());
         _arrangeRunning = false;
+    }
+
+    private void setSquareColor(int ix, int color)
+    {
+        _squares[ix].material.color = Colors[color];
+        ColorblindTexts[ix].text = ColorblindColorNames[color];
+        _squares[ix].gameObject.SetActive(true);
     }
 
     private bool fill(int?[] colors, int ix, int w, int adj1, int adj2)
@@ -484,12 +501,19 @@ public class DividedSquaresModule : MonoBehaviour
     }
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!examine a1 [Briefly examine square A1] | !press a1 [Press square A1 across a timer tick]";
+    private readonly string TwitchHelpMessage = @"!examine a1 [Briefly examine square A1] | !submit a1 [Hold square A1 across a timer tick] | !colorblind";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
     {
-        var m = Regex.Match(command, @"\A\s*(?:(?<examine>examine)|(?<press>press))\s+(?<sq>[A-Z]\d+)\s*\z", RegexOptions.IgnoreCase);
+        if (command.Trim().Equals("colorblind", StringComparison.InvariantCultureIgnoreCase))
+        {
+            SetColorblind(true);
+            yield return null;
+            yield break;
+        }
+
+        var m = Regex.Match(command, @"\A\s*(?:(?<examine>examine)|(?<submit>submit))\s+(?<sq>[A-Z]\d+)\s*\z", RegexOptions.IgnoreCase);
         if (!m.Success)
             yield break;
 
@@ -508,8 +532,8 @@ public class DividedSquaresModule : MonoBehaviour
 
         yield return null;
 
-        // If it’s the wrong square, just press it; it’ll strike regardless of whether we’re doing “examine” or “press”
-        if (_correctSquare != x + 13 * y)
+        // If it’s the wrong square, just press it; it’ll strike regardless of whether we’re doing “examine” or “submit”
+        if (_correctSquare != x + _sideLength * y)
             yield return new[] { AllSquares[x + 13 * y] };
         else if (m.Groups["examine"].Success)
         {
@@ -523,7 +547,7 @@ public class DividedSquaresModule : MonoBehaviour
             yield return new WaitForSeconds(.4f);
             yield return AllSquares[x + 13 * y];
         }
-        else if (m.Groups["press"].Success)
+        else if (m.Groups["submit"].Success)
         {
             yield return AllSquares[x + 13 * y];
             var time = (int) Bomb.GetTime();
