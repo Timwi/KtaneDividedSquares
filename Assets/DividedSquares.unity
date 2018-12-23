@@ -154,7 +154,7 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 0db8d1e33c4bd0b4db41d9c5588d4a28, type: 2}
   m_IsPrefabParent: 0
---- !u!1001 &54695877
+--- !u!1001 &411761841
 Prefab:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -471,11 +471,6 @@ Prefab:
       objectReference: {fileID: 8300000, guid: 1b5a731a26a038546b0474ffe7bd56c7, type: 3}
     - target: {fileID: 114848120511536268, guid: 8814ea52310d2614a9feda02ec355ae4,
         type: 2}
-      propertyPath: EdgeworkConfiguration
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 114848120511536268, guid: 8814ea52310d2614a9feda02ec355ae4,
-        type: 2}
       propertyPath: AudioClips.Array.data[3]
       value: 
       objectReference: {fileID: 8300000, guid: 761e134eb9c524b45b46ce09702ada49, type: 3}
@@ -484,6 +479,11 @@ Prefab:
       propertyPath: AudioClips.Array.data[4]
       value: 
       objectReference: {fileID: 8300000, guid: 3f9e2ebf926655842a74bc8a096ad6ef, type: 3}
+    - target: {fileID: 114848120511536268, guid: 8814ea52310d2614a9feda02ec355ae4,
+        type: 2}
+      propertyPath: TwitchPlaysActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 8814ea52310d2614a9feda02ec355ae4, type: 2}
   m_IsPrefabParent: 0

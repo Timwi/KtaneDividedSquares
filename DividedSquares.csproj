@@ -87,15 +87,31 @@
   <ItemGroup>
     <Compile Include="Assets\DividedSquaresModule.cs" />
     <Compile Include="Assets\DummyModule.cs" />
+    <Compile Include="Assets\KMScripts\GeneralExtensions.cs" />
     <Compile Include="Assets\KMScripts\KMBombInfoExtensions.cs" />
     <Compile Include="Assets\KMScripts\KMColorblindMode.cs" />
     <Compile Include="Assets\KMScripts\KMRuleSeedable.cs" />
+    <Compile Include="Assets\KMScripts\PrivateWhenPlayingAttribute.cs" />
+    <Compile Include="Assets\KMScripts\ReadOnlyWhenPlayingAttribute.cs" />
     <Compile Include="Assets\TestHarness\EdgeworkConfiguration.cs" />
+    <Compile Include="Assets\TestHarness\NeedyTimer.cs" />
+    <Compile Include="Assets\TestHarness\SevenSegDisplay.cs" />
+    <Compile Include="Assets\TestHarness\StatusLight\StatusLight.cs" />
     <Compile Include="Assets\TestHarness\TestHarness.cs" />
     <Compile Include="Assets\TestHarness\TestHighlightable.cs" />
     <Compile Include="Assets\TestHarness\TestSelectable.cs" />
     <Compile Include="Assets\TestHarness\TestSelectableArea.cs" />
     <Compile Include="Assets\TestHarness\THWidget.cs" />
+    <Compile Include="Assets\TestHarness\TimerModule.cs" />
+    <Compile Include="Assets\TestHarness\TwitchPlaysID.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\BatteryWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\CustomWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\IndicatorWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\ModWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\PortWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\SerialNumber.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\TwoFactorWidget.cs" />
+    <Compile Include="Assets\TestHarness\Widgets\Widget.cs" />
     <Compile Include="Assets\Ut.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +129,7 @@
     <None Include="Assets\Shaders\UnlitTexturedLightmap.shader" />
     <None Include="Assets\Shaders\UnlitTransparentVertexColorUnderlay.shader" />
     <None Include="Assets\TestHarness\Outline.shader" />
+    <None Include="Assets\TestHarness\Widgets\Shaders\3DText.shader" />
     <None Include="Assets\TestHarness\_THIS_FOLDER_IS_EXCLUDED_FROM_BUNDLES.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

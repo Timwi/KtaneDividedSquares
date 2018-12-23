@@ -137,6 +137,8 @@
     <Compile Include="Assets\Editor\Scripts\Missions\TableOfContentsSectionList.cs" />
     <Compile Include="Assets\Editor\Scripts\ModConfig.cs" />
     <Compile Include="Assets\Editor\Scripts\ModKitSettingsEditor.cs" />
+    <Compile Include="Assets\Editor\Scripts\PrivateWhenPlayingAttributeDrawer.cs" />
+    <Compile Include="Assets\Editor\Scripts\ReadOnlyWhenPlayingAttributeDrawer.cs" />
     <Compile Include="Assets\Editor\Scripts\Workshop\WorkshopEditorWindow.cs" />
     <Compile Include="Assets\Editor\Scripts\Workshop\WorkshopItem.cs" />
     <Compile Include="Assets\Editor\Scripts\Workshop\WorkshopItemEditor.cs" />
@@ -232,6 +234,7 @@
     <None Include="Assets\Shaders\UnlitTexturedLightmap.shader" />
     <None Include="Assets\Shaders\UnlitTransparentVertexColorUnderlay.shader" />
     <None Include="Assets\TestHarness\Outline.shader" />
+    <None Include="Assets\TestHarness\Widgets\Shaders\3DText.shader" />
     <None Include="Assets\TestHarness\_THIS_FOLDER_IS_EXCLUDED_FROM_BUNDLES.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

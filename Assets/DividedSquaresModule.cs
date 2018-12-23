@@ -22,8 +22,6 @@ public class DividedSquaresModule : MonoBehaviour
     public Transform Field;
     public Transform Rotator;
     public Transform StatusLight;
-    public Transform CapsuleContainer;
-    public MeshRenderer Capsule;
     public KMColorblindMode ColorblindMode;
     public TextMesh TextTempl;
     public TextMesh[] ColorblindTexts;
@@ -65,7 +63,6 @@ public class DividedSquaresModule : MonoBehaviour
 
     private void Start()
     {
-        CapsuleContainer.gameObject.SetActive(Application.isEditor);
         StatusLight.gameObject.SetActive(false);
         SetColorblind(ColorblindMode.ColorblindModeActive);
 
@@ -91,17 +88,8 @@ public class DividedSquaresModule : MonoBehaviour
             AllSquares[i].OnInteractEnded = mouseUp(i % 13, i / 13, i);
         }
 
-        if (Application.isEditor)
-        {
-            _numOtherModules = 38;
-            StartCoroutine(Arrange(3, _curSolved));
-        }
-        else
-        {
-            _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_excludedModules.Contains(str));
-            Debug.LogFormat(@"<Divided Squares #{0}> _numOtherModules = {1}", _moduleId, _numOtherModules);
-            StartCoroutine(Arrange(1, _curSolved));
-        }
+        _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_excludedModules.Contains(str));
+        StartCoroutine(Arrange(1, _curSolved));
     }
 
     private void SetColorblind(bool setting)
@@ -179,7 +167,6 @@ public class DividedSquaresModule : MonoBehaviour
         _squares[i].transform.parent = Rotator;
 
         StatusLight.localPosition = new Vector3(sz * (x - (_sideLength - 1) * .5f), -sz * 1.1f, -sz * (y - (_sideLength - 1) * .5f));
-        Capsule.sharedMaterial.color = Color.grey;
         StatusLight.gameObject.SetActive(true);
 
         Audio.PlaySoundAtTransform("DoorOpen", _squares[i].transform);
@@ -255,8 +242,6 @@ public class DividedSquaresModule : MonoBehaviour
                 }
                 else
                     Module.HandleStrike();
-                if (Application.isEditor)
-                    Capsule.sharedMaterial.color = solve ? Color.green : Color.red;
             }
             yield return null;
         }
@@ -299,10 +284,7 @@ public class DividedSquaresModule : MonoBehaviour
     {
         yield return new WaitUntil(() => !_arrangeRunning);
         if (_sideLength < sideLength)
-        {
-            Debug.LogFormat(@"[Divided Squares #{0}] Number of solved modules surpassed.", _moduleId);
             StartCoroutine(Arrange(sideLength, curSolved));
-        }
     }
 
     private IEnumerator Arrange(int sideLength, int curSolved)
@@ -345,8 +327,6 @@ public class DividedSquaresModule : MonoBehaviour
             _correctSquare = Rnd.Range(0, sideLength * sideLength);
             var sqX = _correctSquare % sideLength;
             var sqY = _correctSquare / sideLength;
-            Debug.LogFormat(@"<Divided Squares #{0}> Side length now {1}", _moduleId, sideLength);
-            Debug.LogFormat(@"<Divided Squares #{0}> Correct square is {1}{2}", _moduleId, (char) ('A' + _correctSquare % sideLength), (_correctSquare / sideLength) + 1);
 
             // Decide on a target number of solved modules, and which color the “correct square” is going to be
             var targetNumbers = Enumerable.Range(sideLength * sideLength - 1, 30)
@@ -415,8 +395,6 @@ public class DividedSquaresModule : MonoBehaviour
             var adj2 = adjacents[Rnd.Range(0, adjacents.Count)];
             adjacents.Remove(adj2);
 
-            Debug.LogFormat(@"<Divided Squares #{0}> Adj: {1}{2}, {3}{4}", _moduleId, (char) ('A' + adj1 % sideLength), adj1 / sideLength + 1, (char) ('A' + adj2 % sideLength), adj2 / sideLength + 1);
-
             // Use a recursive brute-force solver to find an arrangement of colors that satisfies all of the conditions.
             _numFails = 0;
             if (!fill(colors, 0, sideLength, adj1, adj2))
@@ -425,9 +403,6 @@ public class DividedSquaresModule : MonoBehaviour
                 yield return null;
                 goto tryAgain;
             }
-
-            for (int y = 0; y < sideLength; y++)
-                Debug.LogFormat(@"<Divided Squares #{0}> numPairs {1} = {2}", _moduleId, y, string.Join(", ", Enumerable.Range(0, sideLength).Select(x => numPairs(colors, y * sideLength + x, y * sideLength + x, colors[y * sideLength + x].Value, sideLength).ToString()).ToArray()));
 
             var numbers = Enumerable.Range(0, sideLength * sideLength).ToList();
             var step = Rnd.Range(sideLength * sideLength / 4, 3 * sideLength * sideLength / 4);
