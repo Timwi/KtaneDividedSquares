@@ -59,7 +59,7 @@ public class DividedSquaresModule : MonoBehaviour
     private bool _isSolved;
 
     private static readonly int[] _table = @"-1,9,4,2,10,6,20,-1,13,7,19,22,21,25,-1,1,29,5,14,24,16,-1,3,18,12,27,0,23,-1,26,11,15,28,17,8,-1".Split(',').Select(num => int.Parse(num)).ToArray();
-    private static readonly string[] _excludedModules = @"Divided Squares,Forget Me Not,Forget Everything,Turn The Key,The Time Keeper,Souvenir,The Swan".Split(',');
+    private static readonly string[] _excludedModules = @"Divided Squares,Forget Me Not,Forget Everything,Turn The Key,The Time Keeper,Souvenir,The Swan,Simon's Stages".Split(',');
 
     private void Start()
     {
