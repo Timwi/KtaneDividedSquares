@@ -443,13 +443,26 @@ public class DividedSquaresModule : MonoBehaviour
         for (int i = 0; i < Colors.Length; i++)
         {
             var cs = (s + i) % Colors.Length;
-            var aboveFine = ix < w || (cs != colors[ix - w] && (ix - w == _correctSquare || numPairs(colors, ix - w, ix, cs, w) < 2));
-            var leftFine = ix % w == 0 || (cs != colors[ix - 1] && (ix - 1 == _correctSquare || numPairs(colors, ix - 1, ix, cs, w) < 2));
-            var belowFine = ix + w >= w * w || (colors[ix + w] != cs && (colors[ix + w] == null || ix + w == _correctSquare || numPairs(colors, ix + w, ix, cs, w) < 2));
-            var rightFine = ix % w == w - 1 || (colors[ix + 1] != cs && (colors[ix + 1] == null || ix + 1 == _correctSquare || numPairs(colors, ix + 1, ix, cs, w) < 2));
-            if (!aboveFine || !leftFine || !belowFine || !rightFine)
-                continue;
             colors[ix] = cs;
+
+            // Make sure that placing this square doesn’t create pairs with the squares already placed
+            if (numPairs(colors, ix, w) > 1)
+                continue;
+
+            // Make sure that placing this square doesn’t create extra pairs OR same-color pairs in the neighbourhood:
+            // above
+            if (ix >= w && (colors[ix - w] == cs || (ix - w != _correctSquare && numPairs(colors, ix - w, w) > 1)))
+                continue;
+            // below
+            if (ix + w < w * w && (colors[ix + w] == cs || (colors[ix + w] != null && ix + w != _correctSquare && numPairs(colors, ix + w, w) > 1)))
+                continue;
+            // to the left
+            if (ix % w > 0 && (colors[ix - 1] == cs || (ix - 1 != _correctSquare && numPairs(colors, ix - 1, w) > 1)))
+                continue;
+            // to the right
+            if (ix % w < w - 1 && (colors[ix + 1] == cs || (colors[ix + 1] != null && ix + 1 != _correctSquare && numPairs(colors, ix + 1, w) > 1)))
+                continue;
+
             if (fill(colors, ix + 1, w, adj1, adj2))
                 return true;
             if (_numFails > 131072)
@@ -460,9 +473,8 @@ public class DividedSquaresModule : MonoBehaviour
         return false;
     }
 
-    private int numPairs(int?[] colors, int ix, int placeWhere, int colorToPlace, int sideLength)
+    private int numPairs(int?[] colors, int ix, int sideLength)
     {
-        colors[placeWhere] = colorToPlace;
         var r = 0;
         if (ix % sideLength > 0 && _snColorPairs.Any(pair => pair.A == colors[ix - 1] && pair.B == colors[ix]))
             r++;
