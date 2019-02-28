@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using DividedSquares;
 using KModkit;
 using UnityEngine;
 
@@ -18,6 +17,8 @@ public class DividedSquaresModule : MonoBehaviour
     public KMBombInfo Bomb;
     public KMBombModule Module;
     public KMAudio Audio;
+    public KMBossModule BossModule;
+
     public KMSelectable[] AllSquares;
     public Transform Field;
     public Transform Rotator;
@@ -59,7 +60,8 @@ public class DividedSquaresModule : MonoBehaviour
     private bool _isSolved;
 
     private static readonly int[] _table = @"-1,9,4,2,10,6,20,-1,13,7,19,22,21,25,-1,1,29,5,14,24,16,-1,3,18,12,27,0,23,-1,26,11,15,28,17,8,-1".Split(',').Select(num => int.Parse(num)).ToArray();
-    private static readonly string[] _excludedModules = @"Divided Squares,Forget Me Not,Forget Everything,Forget This,Hogwarts,Turn The Key,The Time Keeper,Souvenir,The Swan,Simon's Stages,Purgatory".Split(',');
+    private static readonly string[] _defaultIgnoredModules = @"Divided Squares,Forget Me Not,Forget Everything,Forget This,Hogwarts,Turn The Key,The Time Keeper,Souvenir,The Swan,Simon's Stages,Purgatory,Alchemy,Timing is Everything".Split(',');
+    private string[] _ignoredModules;
 
     private void Start()
     {
@@ -88,7 +90,10 @@ public class DividedSquaresModule : MonoBehaviour
             AllSquares[i].OnInteractEnded = mouseUp(i % 13, i / 13, i);
         }
 
-        _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_excludedModules.Contains(str));
+        _ignoredModules = BossModule.GetIgnoredModules(Module, _defaultIgnoredModules);
+        Debug.LogFormat(@"<Divided Squares #{0}> Ignored modules: {1}", _moduleId, _ignoredModules.Join(", "));
+
+        _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_ignoredModules.Contains(str));
         StartCoroutine(Arrange(1, _curSolved));
     }
 
@@ -255,7 +260,7 @@ public class DividedSquaresModule : MonoBehaviour
         var solved = Bomb.GetSolvedModuleNames();
         for (int i = 0; i < solved.Count; i++)
             modules.Remove(solved[i]);
-        return modules.All(m => _excludedModules.Contains(m));
+        return modules.All(m => _ignoredModules.Contains(m));
     }
 
     private void Update()
