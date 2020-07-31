@@ -65,7 +65,6 @@ public class DividedSquaresModule : MonoBehaviour
 
     private void Start()
     {
-        StatusLight.gameObject.SetActive(false);
         SetColorblind(ColorblindMode.ColorblindModeActive);
 
         _moduleId = _moduleIdCounter++;
@@ -95,6 +94,13 @@ public class DividedSquaresModule : MonoBehaviour
 
         _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_ignoredModules.Contains(str));
         StartCoroutine(Arrange(1, _curSolved));
+        StartCoroutine(HideStatusLight());
+    }
+
+    private IEnumerator HideStatusLight()
+    {
+        yield return null;
+        StatusLight.gameObject.SetActive(false);
     }
 
     private void SetColorblind(bool setting)
@@ -175,7 +181,7 @@ public class DividedSquaresModule : MonoBehaviour
         StatusLight.gameObject.SetActive(true);
 
         Audio.PlaySoundAtTransform("DoorOpen", _squares[i].transform);
-        StartCoroutine(bounceLight(i, sz, solve));
+        StartCoroutine(bounceLight(sz, solve));
 
         var duration = .6f;
         var elapsed = 0f;
@@ -212,10 +218,9 @@ public class DividedSquaresModule : MonoBehaviour
         _animationRunning--;
     }
 
-    private IEnumerator bounceLight(int i, float sz, bool solve)
+    private IEnumerator bounceLight(float sz, bool solve)
     {
         _animationRunning++;
-        StatusLight.gameObject.SetActive(true);
         var duration = .21f;
         var elapsed = 0f;
         while (elapsed < duration)
@@ -287,13 +292,16 @@ public class DividedSquaresModule : MonoBehaviour
 
     private IEnumerator UpdateSolved(int sideLength, int curSolved)
     {
+        _animationRunning++;
         yield return new WaitUntil(() => !_arrangeRunning);
         if (_sideLength < sideLength)
             StartCoroutine(Arrange(sideLength, curSolved));
+        _animationRunning--;
     }
 
     private IEnumerator Arrange(int sideLength, int curSolved)
     {
+        _animationRunning++;
         _arrangeRunning = true;
         _sideLength = sideLength;
 
@@ -428,6 +436,7 @@ public class DividedSquaresModule : MonoBehaviour
         Debug.LogFormat(@"[Divided Squares #{0}] Color A is {1}, Color B is {2}.", _moduleId, ColorNames[_colorA], ColorNames[_colorB]);
         Debug.LogFormat(@"[Divided Squares #{0}] Target number of solved modules: {1}.", _moduleId, _correctNumSolved == null ? "any" : _correctNumSolved.Value.ToString());
         _arrangeRunning = false;
+        _animationRunning--;
     }
 
     private void setSquareColor(int ix, int color)
@@ -493,7 +502,7 @@ public class DividedSquaresModule : MonoBehaviour
     }
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!examine a1 [Briefly examine square A1] | !submit a1 [Hold square A1 across a timer tick] | !colorblind";
+    private readonly string TwitchHelpMessage = @"!{0} examine a1 [Briefly examine square A1] | !{0} submit a1 [Hold square A1 across a timer tick] | !{0} colorblind";
 #pragma warning restore 414
 
     IEnumerator ProcessTwitchCommand(string command)
@@ -553,5 +562,29 @@ public class DividedSquaresModule : MonoBehaviour
         // To ensure the strikes and solves are correctly attributed, just keep the coroutine active while the animation is still running
         while (_animationRunning > 0)
             yield return null;
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        Debug.LogFormat(@"<Divided Squares #{0}> Start of solve handler", _moduleId);
+        while (!_isSolved)
+        {
+            Debug.LogFormat(@"<Divided Squares #{0}> Waiting...", _moduleId);
+            while (!(_correctNumSolved == null || Bomb.GetSolvedModuleNames().Count() == _correctNumSolved.Value || allSolved()) || _arrangeRunning || _animationRunning > 0)
+                yield return true;
+            Debug.LogFormat(@"<Divided Squares #{0}> End of wait; pressing {1}", _moduleId, _correctSquare);
+
+            AllSquares[_correctSquare].OnInteract();
+            var time = (int) Bomb.GetTime();
+            while ((int) Bomb.GetTime() == time)
+                yield return null;
+            Debug.LogFormat(@"<Divided Squares #{0}> Releasing {1}", _moduleId, _correctSquare);
+            AllSquares[_correctSquare].OnInteractEnded();
+        }
+        Debug.LogFormat(@"<Divided Squares #{0}> End of loop", _moduleId);
+
+        while (_animationRunning > 0)
+            yield return true;
+        Debug.LogFormat(@"<Divided Squares #{0}> End of handler", _moduleId);
     }
 }

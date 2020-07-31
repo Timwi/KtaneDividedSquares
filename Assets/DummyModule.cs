@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
+
+using Rnd = UnityEngine.Random;
 
 /// <summary>
 /// Used for debugging. Simply click to solve.
@@ -26,5 +29,19 @@ public class DummyModule : MonoBehaviour
             _isSolved = true;
         }
         return false;
+    }
+
+    private IEnumerator SolveAfterRandomTime()
+    {
+        yield return new WaitForSeconds(Rnd.Range(1f, 3f));
+        _isSolved = true;
+        Module.HandlePass();
+    }
+
+    IEnumerator TwitchHandleForcedSolve()
+    {
+        StartCoroutine(SolveAfterRandomTime());
+        while (!_isSolved)
+            yield return true;
     }
 }
