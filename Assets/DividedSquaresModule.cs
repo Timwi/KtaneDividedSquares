@@ -63,8 +63,14 @@ public class DividedSquaresModule : MonoBehaviour
     private static readonly string[] _defaultIgnoredModules = @"Divided Squares,Forget Me Not,Forget Everything,Forget This,Hogwarts,Turn The Key,The Time Keeper,Souvenir,The Swan,Simon's Stages,Purgatory,Alchemy,Timing is Everything".Split(',');
     private string[] _ignoredModules;
 
+    private DividedSquaresSettings settings = new DividedSquaresSettings();
+
     private void Start()
     {
+        ModConfig<DividedSquaresSettings> modConfig = new ModConfig<DividedSquaresSettings>("DividedSquaresSettings");
+        settings = modConfig.Settings;
+        modConfig.Settings = settings;
+
         SetColorblind(ColorblindMode.ColorblindModeActive);
 
         _moduleId = _moduleIdCounter++;
@@ -93,7 +99,10 @@ public class DividedSquaresModule : MonoBehaviour
         Debug.LogFormat(@"<Divided Squares #{0}> Ignored modules: {1}", _moduleId, _ignoredModules.Join(", "));
 
         _numOtherModules = Bomb.GetSolvableModuleNames().Count(str => !_ignoredModules.Contains(str));
-        StartCoroutine(Arrange(1, _curSolved));
+        var squareCount = settings.startingSquares > 0 && settings.startingSquares < 14 ? settings.startingSquares : 1;
+        if (settings.startingSquares < 1 || settings.startingSquares > 13)
+            Debug.LogFormat("<Divided Squares #{0}> The starting square count was set to an invalid value, defaulting to 1.", _moduleId);
+        StartCoroutine(Arrange(squareCount, _curSolved));
         StartCoroutine(HideStatusLight());
     }
 
@@ -143,7 +152,7 @@ public class DividedSquaresModule : MonoBehaviour
             var c = Bomb.GetSolvedModuleNames().Count();
             if (c != _squareDownAtSolved.Value)
             {
-                // The number of solved modules has changed while the button was held. 
+                // The number of solved modules has changed while the button was held.
                 // This can happen frequently on TP, so tolerate it.
                 return;
             }
@@ -587,4 +596,30 @@ public class DividedSquaresModule : MonoBehaviour
             yield return true;
         Debug.LogFormat(@"<Divided Squares #{0}> End of handler", _moduleId);
     }
+
+    class DividedSquaresSettings
+    {
+        public int startingSquares = 1;
+    }
+
+    #pragma warning disable 414
+    private static Dictionary<string, object>[] TweaksEditorSettings = new Dictionary<string, object>[]
+    {
+        new Dictionary<string, object>
+        {
+            { "Filename", "DividedSquaresSettings.json" },
+            { "Name", "Divided Squares" },
+            {
+                "Listing", new List<Dictionary<string, object>>
+                {
+                    new Dictionary<string, object>
+                    {
+                        { "Key", "Starting squares" },
+                        { "Text", "This squared will be the number of squares the module starts with (e.g. if this is set to 2, there will be 4 squares at the beginning)." }
+                    }
+                }
+            }
+        }
+    };
+    #pragma warning restore 414
 }
