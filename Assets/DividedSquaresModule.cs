@@ -574,12 +574,13 @@ public class DividedSquaresModule : MonoBehaviour
                 yield return true;
             Debug.LogFormat(@"<Divided Squares #{0}> End of wait; pressing {1}", _moduleId, _correctSquare);
 
-            AllSquares[_correctSquare].OnInteract();
+            var coord = _correctSquare % _sideLength + 13 * (_correctSquare / _sideLength);
+            AllSquares[coord].OnInteract();
             var time = (int) Bomb.GetTime();
             while ((int) Bomb.GetTime() == time)
                 yield return null;
             Debug.LogFormat(@"<Divided Squares #{0}> Releasing {1}", _moduleId, _correctSquare);
-            AllSquares[_correctSquare].OnInteractEnded();
+            AllSquares[coord].OnInteractEnded();
         }
         Debug.LogFormat(@"<Divided Squares #{0}> End of loop", _moduleId);
 
