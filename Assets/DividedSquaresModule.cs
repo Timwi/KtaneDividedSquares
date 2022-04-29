@@ -58,6 +58,7 @@ public class DividedSquaresModule : MonoBehaviour
     private int? _squareDownAtSolved;
     private int? _squareDownAtTimer;
     private bool _isSolved;
+    private bool _colorblind;
 
     private static readonly int[] _table = @"-1,9,4,2,10,6,20,-1,13,7,19,22,21,25,-1,1,29,5,14,24,16,-1,3,18,12,27,0,23,-1,26,11,15,28,17,8,-1".Split(',').Select(num => int.Parse(num)).ToArray();
     private static readonly string[] _defaultIgnoredModules = @"Divided Squares,Forget Me Not,Forget Everything,Forget This,Hogwarts,Turn The Key,The Time Keeper,Souvenir,The Swan,Simon's Stages,Purgatory,Alchemy,Timing is Everything".Split(',');
@@ -65,7 +66,8 @@ public class DividedSquaresModule : MonoBehaviour
 
     private void Start()
     {
-        SetColorblind(ColorblindMode.ColorblindModeActive);
+        _colorblind = ColorblindMode.ColorblindModeActive;
+        SetColorblind();
 
         _moduleId = _moduleIdCounter++;
         _squares = AllSquares.Select(obj => obj.GetComponent<MeshRenderer>()).ToArray();
@@ -103,10 +105,10 @@ public class DividedSquaresModule : MonoBehaviour
         StatusLight.gameObject.SetActive(false);
     }
 
-    private void SetColorblind(bool setting)
+    private void SetColorblind()
     {
         for (var i = 0; i < ColorblindTexts.Length; i++)
-            ColorblindTexts[i].gameObject.SetActive(setting);
+            ColorblindTexts[i].gameObject.SetActive(_colorblind);
     }
 
     private KMSelectable.OnInteractHandler mouseDown(int x, int y, int i)
@@ -509,7 +511,8 @@ public class DividedSquaresModule : MonoBehaviour
     {
         if (command.Trim().Equals("colorblind", StringComparison.InvariantCultureIgnoreCase))
         {
-            SetColorblind(true);
+            _colorblind = !_colorblind;
+            SetColorblind();
             yield return null;
             yield break;
         }
